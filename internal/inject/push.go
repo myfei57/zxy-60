@@ -6,10 +6,15 @@ import (
 )
 
 func (inj *Injector) Push(bag model.Bag, chuteID string) error {
-	if err := inj.sorter.Dispatch(bag, tag.Reading{Committed: true}); err != nil {
+	// Persist the chute assignment before dispatching the bag into the sort
+	// queue. If the assignment is saved only after dispatch, a restart in
+	// between recovers the stale (old) chute from the snapshot and the bag
+	// is routed to the wrong flight. Routing must follow the latest
+	// allocation after recovery.
+	if err := inj.sorter.AssignChute(bag.FlightID, chuteID); err != nil {
 		return err
 	}
-	return inj.sorter.AssignChute(bag.FlightID, chuteID)
+	return inj.sorter.Dispatch(bag, tag.Reading{Committed: true})
 }
 
 func (inj *Injector) Accept(bag model.Bag) error {
