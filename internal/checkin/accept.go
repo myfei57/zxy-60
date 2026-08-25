@@ -1,8 +1,16 @@
 package checkin
 
-import "bagsort/internal/model"
+import (
+	"bagsort/internal/flight"
+	"bagsort/internal/model"
+)
 
 func (d *Desk) CheckIn(barcode string, flightID string) (model.Bag, error) {
+	// Reject bags for closed flights before any side effects: a closed flight
+	// has finished loading, so late bags cannot make the flight.
+	if d.book.IsClosed(flightID) {
+		return model.Bag{}, flight.ErrFlightClosed
+	}
 	reading, err := d.reader.Read(barcode)
 	if err != nil {
 		return model.Bag{}, err

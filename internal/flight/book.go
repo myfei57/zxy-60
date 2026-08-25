@@ -64,6 +64,16 @@ func (b *Book) IsOpen(flightID string) bool {
 	return f.State == model.FlightOpen || f.State == model.FlightBoarding
 }
 
+// IsClosed reports whether the flight has been closed. Once closed, check-in
+// must not accept any further bags for the flight.
+func (b *Book) IsClosed(flightID string) bool {
+	f, err := b.Get(flightID)
+	if err != nil {
+		return false
+	}
+	return f.State == model.FlightClosed
+}
+
 func (b *Book) State(flightID string) (model.FlightState, error) {
 	f, err := b.Get(flightID)
 	if err != nil {
