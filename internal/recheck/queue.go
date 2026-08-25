@@ -18,9 +18,9 @@ func (q *Queue) Dequeue() (model.Bag, bool) {
 	if len(q.items) == 0 {
 		return model.Bag{}, false
 	}
-	last := q.items[len(q.items)-1]
-	q.items = q.items[:len(q.items)-1]
-	return last, true
+	first := q.items[0]
+	q.items = q.items[1:]
+	return first, true
 }
 
 func (q *Queue) Len() int {
