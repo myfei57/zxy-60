@@ -37,6 +37,9 @@ func (r *Reader) Read(barcode string) (Reading, error) {
 	}, nil
 }
 
+// Commit persists the barcode read so that the sorter can verify the read was
+// submitted before dispatching sort instructions. A read that has not been
+// committed must never participate in scheduling.
 func (r *Reader) Commit(reading Reading) error {
 	snap, err := r.store.Load()
 	if err != nil {
@@ -50,5 +53,18 @@ func (r *Reader) Commit(reading Reading) error {
 		State:    model.BagCheckedIn,
 	}
 	snap.Bags[bag.ID] = bag
+	if snap.CommittedReads == nil {
+		snap.CommittedReads = map[string]bool{}
+	}
+	snap.CommittedReads[bag.ID] = true
 	return r.store.Save(snap)
+}
+
+// IsCommitted reports whether the barcode read for bagID has been committed.
+func (r *Reader) IsCommitted(bagID string) (bool, error) {
+	snap, err := r.store.Load()
+	if err != nil {
+		return false, err
+	}
+	return snap.CommittedReads[bagID], nil
 }

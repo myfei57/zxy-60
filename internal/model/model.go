@@ -96,6 +96,9 @@ type Snapshot struct {
 	TransferCommands []TransferCommand  `json:"transfer_commands"`
 	Sequence         Sequence           `json:"sequence"`
 	SortRecords      []SortRecord       `json:"sort_records"`
+	// CommittedReads records the bag IDs whose barcode read has been committed.
+	// Dispatch must not issue sort instructions for bags absent from this set.
+	CommittedReads   map[string]bool    `json:"committed_reads"`
 }
 
 func NewSnapshot() *Snapshot {
@@ -106,5 +109,6 @@ func NewSnapshot() *Snapshot {
 		ChuteAssignments: map[string]string{},
 		TransferCommands: []TransferCommand{},
 		SortRecords:      []SortRecord{},
+		CommittedReads:   map[string]bool{},
 	}
 }

@@ -51,6 +51,9 @@ func (s *Store) Load() (*model.Snapshot, error) {
 	if snap.SortRecords == nil {
 		snap.SortRecords = []model.SortRecord{}
 	}
+	if snap.CommittedReads == nil {
+		snap.CommittedReads = map[string]bool{}
+	}
 	return &snap, nil
 }
 
